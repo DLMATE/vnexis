@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TypeVar, Generic
+from typing import TypeVar
 
 E = TypeVar("E", bound="Event")
 
@@ -13,7 +15,7 @@ class Event:
 
 
 class EventHandler(ABC):
-    def __init__(self, event_bus: "EventBus"):
+    def __init__(self, event_bus: "EventBus" | None = None):
         self._event_bus = event_bus
 
     @abstractmethod
@@ -33,4 +35,9 @@ class EventBus:
             event_handler.handle(event)
 
 
+global event_bus
 event_bus = EventBus()
+
+
+def get_glboal_event_bus():
+    return event_bus

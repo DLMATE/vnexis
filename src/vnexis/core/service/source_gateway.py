@@ -11,11 +11,13 @@ from vnexis.core.event import RawDataCollected
 class SourceGateway(ABC):
     def __init__(
         self,
+        client_id: int,
         source_type: Literal["rtsp", "file", "nas", "camera", "db"],
         path: str,
         event_bus: EventBus,
         delay: float = 0.1,
     ):
+        self._client_id = client_id
         self._source_type = source_type
         self._path = path
         self._event_bus = event_bus
@@ -27,8 +29,8 @@ class SourceGateway(ABC):
         )
 
     @property
-    def media_type(self) -> str:
-        return self._media_type
+    def source_type(self) -> str:
+        return self._source_type
 
     def __del__(self):
         self.disconnect()
@@ -54,11 +56,17 @@ class SourceGateway(ABC):
         self._thread.join()
 
     def _process(self):
-        for raw_data in self.collect():
+        for session_id, raw_data in enumerate(self.collect()):
             if not raw_data:
                 continue
-            event = RawDataCollected(raw_data=raw_data)
+            event = RawDataCollected(
+                client_id=self._client_id, session_id=session_id, raw_data=raw_data
+            )
             self._event_bus.publish(event)
             if not self._is_running:
                 break
             time.sleep(self._delay)
+
+    @property
+    def is_running(self) -> bool:
+        return self._is_running
