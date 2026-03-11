@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TypeVar
@@ -15,11 +17,29 @@ class Event:
 
 
 class EventHandler(ABC):
-    def __init__(self, event_bus: "EventBus" | None = None):
-        self._event_bus = event_bus
+    logger = logging.getLogger(__name__)
 
     @abstractmethod
     def handle(self, event: Event):
+        pass
+
+
+class AsyncEventHandler(EventHandler):
+    def __init__(self, event_bus: "EventBus" | None = None, max_workers: int = 1):
+        self._event_bus = event_bus
+        self._executor = ThreadPoolExecutor(
+            max_workers=max_workers, thread_name_prefix=f"{self.__class__.__name__}"
+        )
+
+    def __del__(self):
+        self._executor.shutdown()
+        self.logger.info(f"Shutdown {self.__class__.__name__}")
+
+    def handle(self, event: Event):
+        self._executor.submit(self._handle_in_background, event)
+
+    @abstractmethod
+    def _handle_in_background(self, event: Event):
         pass
 
 
