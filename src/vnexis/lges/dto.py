@@ -2,13 +2,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from vnexis.core.entity.raw_data import RawData
-from vnexis.core.entity.target import (
+from vnexis.core.dto import (
     DetectResult,
     Frame,
     Metadata,
-    PostprocessResult,
     PreprocessResult,
+    RawData,
 )
 
 
@@ -20,6 +19,7 @@ class LgesRawData(RawData):
 @dataclass
 class LgesMetadata(Metadata):
     cell_id: str
+    key_frame_detect_time: float
 
 
 @dataclass
@@ -40,9 +40,5 @@ class LgesPreprocessResult(PreprocessResult):
 
 @dataclass
 class LgesDetectResult(DetectResult):
-    fault_frame_detection_results: list[DetectionResultDto]
-
-
-@dataclass
-class LgesPostproessResult(PostprocessResult):
-    fault_frame_detection_results: list[DetectionResultDto]
+    fault_frame_detection_result: DetectionResultDto
+    time: float

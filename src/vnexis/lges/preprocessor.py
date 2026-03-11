@@ -7,9 +7,9 @@ import numpy as np
 import onnxruntime as ort
 
 from vnexis.common.utils import resize_image
-from vnexis.core.entity.target import Frame
+from vnexis.core.dto import Frame
 from vnexis.core.service.preprocessor import Preprocessor
-from vnexis.lges.entity import (
+from vnexis.lges.dto import (
     DetectionResultDto,
     LgesMetadata,
     LgesPreprocessResult,
@@ -28,9 +28,8 @@ class KeyFrameDetector(Preprocessor):
         thresholds: list[float] = [],
         default_threshold: float = 0.7,
     ):
-        super().__init__(event_bus)
+        super().__init__(client_id, event_bus)
 
-        self._client_id = client_id
         self._model_path = model_path
         self._thresholds = thresholds
         self._idx = 0
@@ -60,16 +59,17 @@ class KeyFrameDetector(Preprocessor):
         self.img_size = self.session.get_inputs()[0].shape[2:]
 
     def preprocess(self, raw_data: LgesRawData) -> LgesPreprocessResult:
-        metadata = LgesMetadata(cell_id=str(uuid4()))
-
         try:
             s_time = time.perf_counter()
             img = self._preprocess(raw_data.frame)
             outputs = self.session.run(self.output_names, {self.input_name: img})
             detection_result = self._postprocess(outputs)
             e_time = time.perf_counter()
-            logger.info(
-                f"frame_idx: {raw_data.frame.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {e_time - s_time}"
+            # logger.info(
+            #     f"client_id: {self._client_id}, frame_idx: {raw_data.frame.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {e_time - s_time}"
+            # )
+            metadata = LgesMetadata(
+                cell_id=str(uuid4()), key_frame_detect_time=e_time - s_time
             )
             return LgesPreprocessResult(
                 frame=raw_data.frame,

@@ -5,9 +5,9 @@ from enum import Enum
 import numpy as np
 
 from vnexis.common.event import EventBus
-from vnexis.core.entity.target import Target
+from vnexis.core.dto import Target
 from vnexis.core.service.preprocessor import TargetCreator
-from vnexis.lges.entity import LgesPreprocessResult, LgesRawData
+from vnexis.lges.dto import LgesPreprocessResult, LgesRawData
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ class TriggerTracker(TargetCreator):
 
     def __init__(
         self,
+        client_id: int,
         event_bus: EventBus,
         num_watch: int = 10,
         margin: int = 1,
@@ -38,7 +39,7 @@ class TriggerTracker(TargetCreator):
             margin (int): 트래커 상태 변화 허용 범위
             num_capture (int): 트리거 후 캡쳐 프레임 개수
         """
-        super().__init__(event_bus)
+        super().__init__(client_id, event_bus)
         self.num_watch = num_watch
         self.margin = margin
         self.num_capture = num_capture

@@ -1,9 +1,8 @@
 import logging
-import time
 
-import cv2
+import uvicorn
 
-from vnexis.common.event import get_glboal_event_bus
+from vnexis.common.event import EventBus
 from vnexis.core.event import (
     DefectDetected,
     FrameBuffered,
@@ -18,41 +17,47 @@ from vnexis.core.service.frame_clipper import FrameClipperHandler, FrameClipperM
 
 from .collector import AvSourceGateway
 from .detector import FaultFrameDetector
-from .displayer import Displayer
 from .postprocessor import ImageSaver, VideoRequester, VideoSaver
 from .preprocessor import KeyFrameDetector
 from .target_creator import TriggerTracker
+from .web_displayer import WebDisplayer
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def main():
-    client_id = 0
     max_client = 4
     video_path = "C://workspace//stream_inspection//assets//hm_anvil//video//5s, no 14 pallete.mp4"
     key_frame_model_path = "C://workspace//stream_inspection//assets//hm_anvil//trigger//trigger_yolonas_s_v1.0.onnx"
     fault_frame_model_path = "C://workspace//stream_inspection//assets//hm_anvil//defect//YoloNAS_Seg_S_v1.1.onnx"
-    event_bus = get_glboal_event_bus()
 
+    event_bus = EventBus()
+
+    # ── 공통 서비스 ──
     frame_buffer_manager = FrameBufferManager()
     frame_buffer_handler = FrameBufferHandler(event_bus, frame_buffer_manager)
 
     frame_clipper_manager = FrameClipperManager()
-    frame_clipper_manager.add_frame_clipper
     frame_clipper_handler = FrameClipperHandler(event_bus, frame_clipper_manager)
 
     image_saver = ImageSaver(event_bus)
     video_requester = VideoRequester(event_bus, frame_clipper_manager)
     video_saver = VideoSaver(event_bus)
 
+    # ── WebDisplayer ──
+    web_displayer = WebDisplayer(event_bus)
+
+    # ── 공통 구독 ──
     event_bus.subscribe(FrameCaptured, frame_buffer_handler)
     event_bus.subscribe(FrameBuffered, frame_clipper_handler)
     event_bus.subscribe(DefectDetected, image_saver)
     event_bus.subscribe(DefectDetected, video_requester)
     event_bus.subscribe(FramePendingDone, video_saver)
+    event_bus.subscribe(Preprocessed, web_displayer)
 
+    # ── 클라이언트별 파이프라인 ──
     collectors = []
-    displayers = []
     for client_id in range(max_client):
         frame_buffer_manager.add_buffer(client_id)
         frame_clipper_manager.add_frame_clipper(
@@ -70,29 +75,23 @@ def main():
 
         event_bus.subscribe(RawDataCollected, key_frame_detector)
         event_bus.subscribe(Preprocessed, trigger_tracker)
-
         event_bus.subscribe(TargetCreated, fault_frame_detector)
 
         collectors.append(collector)
 
-    displayer = Displayer(0, event_bus)
-    event_bus.subscribe(Preprocessed, displayer)
-    displayers.append(displayer)
-
+    # ── Collector 시작 ──
     for collector in collectors:
         collector.connect()
         video_saver.set_input_stream(collector.stream)
         collector.start()
-    # for displayer in displayers:
-    displayer.show()
 
-    while displayer.is_running:
-        time.sleep(0.1)
+    # ── FastAPI 서버 시작 (메인 스레드) ──
+    logger.info("[Main] http://localhost:8080 에서 모니터링")
+    uvicorn.run(web_displayer.app, host="0.0.0.0", port=8080, log_level="warning")
 
+    # ── 종료 ──
     for collector in collectors:
         collector.disconnect()
-    cv2.destroyAllWindows()
-    exit(0)
 
 
 if __name__ == "__main__":

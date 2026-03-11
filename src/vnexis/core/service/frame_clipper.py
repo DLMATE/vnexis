@@ -3,7 +3,7 @@ import threading
 from dataclasses import dataclass, field
 
 from vnexis.common.event import EventBus, EventHandler
-from vnexis.core.entity.target import Frame
+from vnexis.core.dto import Frame
 from vnexis.core.event import FrameBuffered, FramePendingDone
 from vnexis.core.service.frame_buffer import FrameBuffer
 

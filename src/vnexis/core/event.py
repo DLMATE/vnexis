@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 
 from vnexis.common.event import Event
-from vnexis.core.entity.raw_data import RawData
-from vnexis.core.entity.target import (
+from vnexis.core.dto import (
     DetectResult,
     Frame,
-    PostprocessResult,
     PreprocessResult,
+    RawData,
     Target,
 )
 
@@ -46,18 +45,7 @@ class DetectionDone(Event):
 
 
 @dataclass(kw_only=True, frozen=True)
-class Postprocessed(Event):
-    client_id: int
-    session_id: int
-    raw_data: RawData
-    preprocess_result: PreprocessResult
-    target: Target
-    detect_result: DetectResult
-    postprocess_result: PostprocessResult
-
-
-@dataclass(kw_only=True, frozen=True)
-class DefectDetected(Postprocessed): ...
+class DefectDetected(DetectionDone): ...
 
 
 @dataclass(kw_only=True, frozen=True)

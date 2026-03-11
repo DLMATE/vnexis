@@ -5,7 +5,7 @@ import av
 import av.datasets
 
 from vnexis.common.event import EventBus
-from vnexis.core.entity.frame import Frame
+from vnexis.core.dto import Frame
 from vnexis.core.service.source_gateway import SourceGateway
 
 logger = logging.getLogger(__name__)

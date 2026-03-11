@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Iterator, Literal
 
 from vnexis.common.event import EventBus
-from vnexis.core.entity.raw_data import RawData
+from vnexis.core.dto import RawData
 from vnexis.core.event import RawDataCollected
 
 

@@ -3,7 +3,7 @@ import threading
 from collections import deque
 
 from vnexis.common.event import EventBus, EventHandler
-from vnexis.core.entity.target import Frame
+from vnexis.core.dto import Frame
 from vnexis.core.event import FrameBuffered, FrameCaptured
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,9 @@ class FrameBufferManager:
         if client_id in self._frame_buffers.keys():
             raise Exception(f"FrameBuffer already exists. client_id: {client_id}")
         self._frame_buffers[client_id] = FrameBuffer(max_size)
+
+    def get_buffer(self, client_id) -> FrameBuffer:
+        return self._frame_buffers[client_id]
 
     def clear_buffer(self, client_id: int):
         self._frame_buffers.pop(client_id, None)

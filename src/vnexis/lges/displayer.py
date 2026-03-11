@@ -8,14 +8,17 @@ import cv2
 from vnexis.common.event import EventHandler
 from vnexis.common.utils import draw_text_using_idx, resize_boxes
 from vnexis.core.event import Preprocessed
-from vnexis.lges.entity import LgesPreprocessResult
+from vnexis.lges.dto import LgesPreprocessResult
 
 logger = logging.getLogger(__name__)
 
 
 class Displayer(EventHandler):
-    def __init__(self, event_bus=None, width: int = 800, height: int = 600):
+    def __init__(
+        self, client_id: int, event_bus=None, width: int = 800, height: int = 600
+    ):
         super().__init__(event_bus)
+        self._client_id = client_id
         self._queue: deque[LgesPreprocessResult] = deque(maxlen=30 * 2)
         self._lock = threading.Lock()
         self._width = width
@@ -24,6 +27,8 @@ class Displayer(EventHandler):
         self._thickness = 2
 
     def handle(self, event: Preprocessed):
+        if event.client_id != self._client_id:
+            return
         with self._lock:
             self._queue.append(event.result)
 
@@ -87,7 +92,13 @@ class Displayer(EventHandler):
                     data, f"fps: {int(1 / (end - start))}", 2, (0, 255, 0)
                 )
                 data = draw_text_using_idx(data, f"qsize: {qsize}", 3, (0, 255, 0))
-                cv2.imshow("display", data)
+                data = draw_text_using_idx(
+                    data,
+                    f"keyframe detect time: {preprocess_result.metadata.key_frame_detect_time:.3f}",
+                    4,
+                    (0, 255, 0),
+                )
+                cv2.imshow(f"{self._client_id} display", data)
                 key = cv2.waitKey(30)
                 if key == 27:
                     self._is_running = False

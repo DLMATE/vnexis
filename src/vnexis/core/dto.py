@@ -5,6 +5,10 @@ import numpy as np
 
 
 @dataclass
+class RawData: ...
+
+
+@dataclass
 class Frame:
     idx: int
     raw: str | bytes | np.ndarray | av.Packet
