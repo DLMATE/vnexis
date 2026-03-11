@@ -1,5 +1,5 @@
 [project]
-name = "ivs"
+name = "inference"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,24 +7,11 @@ authors = [
     { name = "GwonilJoo", email = "gwonil3256@gmail.com" }
 ]
 requires-python = ">=3.13"
-dependencies = [
-    "aiortc>=1.14.0",
-    "fastapi[standard]>=0.135.1",
-    "numpy>=2.4.2",
-    "nvitop>=1.6.2",
-    "onnxruntime-gpu>=1.24.1",
-    "opencv-python>=4.13.0.92",
-    "pyzmq>=27.1.0",
-]
+dependencies = []
 
 [project.scripts]
-ivs = "ivs:main"
+inference = "inference:main"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]
 build-backend = "uv_build"
-
-[tool.uv.workspace]
-members = [
-    "modules/inference",
-]
