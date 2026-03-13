@@ -2,9 +2,7 @@ import logging
 import threading
 from collections import deque
 
-from vnexis.common.event import EventBus, EventHandler
 from vnexis.core.dto import Frame
-from vnexis.core.event import FrameBuffered, FrameCaptured
 
 logger = logging.getLogger(__name__)
 
@@ -47,19 +45,3 @@ class FrameBufferManager:
 
     def get_frames(self, client_id: int, s_idx: int, e_idx: int) -> list[Frame]:
         return self._frame_buffers[client_id].get_frames(s_idx, e_idx)
-
-
-class FrameBufferHandler(EventHandler):
-    def __init__(self, event_bus: EventBus, frame_buffer_manager: FrameBufferManager):
-        super().__init__(event_bus)
-        self._frame_buffer_manager = frame_buffer_manager
-
-    def handle(self, event: FrameCaptured):
-        self._frame_buffer_manager.add_frame(event.client_id, event.frame)
-        self._event_bus.publish(
-            FrameBuffered(
-                client_id=event.client_id,
-                session_id=event.session_id,
-                frame=event.frame,
-            )
-        )

@@ -3,19 +3,18 @@ from typing import Iterator
 
 import av
 import av.datasets
-
-from vnexis.common.event import EventBus
 from vnexis.core.dto import Frame
 from vnexis.core.event import FrameCaptured
-from vnexis.core.service.source_gateway import SourceGateway
+
+from vnexis.core.domain.service.raw_data_collector import RawDataCollector
 from vnexis.lges.dto import LgesRawData
 
 logger = logging.getLogger(__name__)
 
 
-class AvSourceGateway(SourceGateway):
-    def __init__(self, client_id: int, path: str, event_bus: EventBus):
-        super().__init__(client_id, "video", path, event_bus)
+class VideoReader(RawDataCollector):
+    def __init__(self, session_id: int, path: str):
+        super().__init__(session_id, "video", path)
 
         self._container = None
         self._stream = None

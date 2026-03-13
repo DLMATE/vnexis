@@ -3,21 +3,21 @@ import time
 from abc import ABC, abstractmethod
 from typing import Iterator, Literal
 
-from vnexis.common.event import EventBus
-from vnexis.core.dto import RawData
-from vnexis.core.event import RawDataCollected
+from vnexis.core.common.event import EventBus
+from vnexis.core.domain.event import RawDataCollected
+from vnexis.core.domain.value_object import RawData
 
 
-class SourceGateway(ABC):
+class RawDataCollector(ABC):
     def __init__(
         self,
-        client_id: int,
+        session_id: int,
         source_type: Literal["rtsp", "file", "nas", "camera", "db"],
         path: str,
-        event_bus: EventBus,
+        event_bus: EventBus = EventBus(),
         delay: float = 0.1,
     ):
-        self._client_id = client_id
+        self._session_id = session_id
         self._source_type = source_type
         self._path = path
         self._event_bus = event_bus
@@ -59,9 +59,7 @@ class SourceGateway(ABC):
         for session_id, raw_data in enumerate(self.collect()):
             if not raw_data:
                 continue
-            event = RawDataCollected(
-                client_id=self._client_id, session_id=session_id, raw_data=raw_data
-            )
+            event = RawDataCollected(session_id=session_id, raw_data=raw_data)
             self._event_bus.publish(event)
             if not self._is_running:
                 break

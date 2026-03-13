@@ -6,7 +6,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 E = TypeVar("E", bound="Event")
 
@@ -16,17 +16,19 @@ class Event:
     timestamp: datetime = field(default_factory=datetime.now)
 
 
-class EventHandler(ABC):
+class EventHandler(ABC, Generic[E]):
     logger = logging.getLogger(__name__)
 
+    def handle(self, event: E):
+        self.process(event)
+
     @abstractmethod
-    def handle(self, event: Event):
+    def process(self, event: E):
         pass
 
 
-class AsyncEventHandler(EventHandler):
-    def __init__(self, event_bus: "EventBus" | None = None, max_workers: int = 1):
-        self._event_bus = event_bus
+class AsyncEventHandler(ABC, EventHandler, Generic[E]):
+    def __init__(self, max_workers: int = 1):
         self._executor = ThreadPoolExecutor(
             max_workers=max_workers, thread_name_prefix=f"{self.__class__.__name__}"
         )
@@ -35,11 +37,11 @@ class AsyncEventHandler(EventHandler):
         self._executor.shutdown()
         self.logger.info(f"Shutdown {self.__class__.__name__}")
 
-    def handle(self, event: Event):
-        self._executor.submit(self._handle_in_background, event)
+    def handle(self, event: E):
+        self._executor.submit(self.process, event)
 
     @abstractmethod
-    def _handle_in_background(self, event: Event):
+    def process(self, event: E):
         pass
 
 
