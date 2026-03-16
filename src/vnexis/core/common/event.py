@@ -20,7 +20,12 @@ class EventHandler(ABC, Generic[E]):
     logger = logging.getLogger(__name__)
 
     def handle(self, event: E):
-        self.process(event)
+        try:
+            self.process(event)
+        except Exception:
+            self.logger.exception(
+                f"[{self.__class__.__name__}] Error processing {type(event).__name__}"
+            )
 
     @abstractmethod
     def process(self, event: E):
@@ -38,7 +43,7 @@ class AsyncEventHandler(EventHandler[E]):
         self.logger.info(f"Shutdown {self.__class__.__name__}")
 
     def handle(self, event: E):
-        self._executor.submit(self.process, event)
+        self._executor.submit(super().handle, event)
 
     @abstractmethod
     def process(self, event: E):

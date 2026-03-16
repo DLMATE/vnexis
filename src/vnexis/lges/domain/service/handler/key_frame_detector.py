@@ -5,6 +5,7 @@ from uuid import uuid4
 import numpy as np
 import onnxruntime as ort
 
+from vnexis.core.common.event import EventBus
 from vnexis.core.common.utils import resize_image
 from vnexis.core.domain.event import RawDataCollected
 from vnexis.core.domain.service.handler import RawDataCollectedHandler
@@ -22,10 +23,11 @@ class KeyFrameDetector(RawDataCollectedHandler[FrameData]):
         self,
         session_id: int,
         model_path: str,
+        event_bus: EventBus,
         thresholds: list[float] = [],
         default_threshold: float = 0.7,
     ):
-        super().__init__(session_id)
+        super().__init__(session_id, event_bus)
 
         self._model_path = model_path
         self._thresholds = thresholds

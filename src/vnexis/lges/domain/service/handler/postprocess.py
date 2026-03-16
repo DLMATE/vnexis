@@ -6,7 +6,7 @@ from pathlib import Path
 import av
 import cv2
 
-from vnexis.core.common.event import AsyncEventHandler, EventHandler
+from vnexis.core.common.event import AsyncEventHandler
 from vnexis.core.domain.event import FramePendingDone
 from vnexis.core.domain.service.frame_clipper import FrameClipperManager
 from vnexis.lges.domain.event import FaultFrameDetected
@@ -14,8 +14,9 @@ from vnexis.lges.domain.event import FaultFrameDetected
 logger = logging.getLogger(__name__)
 
 
-class VideoRequester(EventHandler[FaultFrameDetected]):
+class VideoRequester(AsyncEventHandler[FaultFrameDetected]):
     def __init__(self, frame_clipper_manager: FrameClipperManager):
+        super().__init__()
         self._frame_clipper_manager = frame_clipper_manager
 
     def process(self, event: FaultFrameDetected):

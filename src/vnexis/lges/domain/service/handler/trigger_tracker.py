@@ -3,6 +3,7 @@ from enum import Enum
 
 import numpy as np
 
+from vnexis.core.common.event import EventBus
 from vnexis.core.domain.service.handler import DomainEventHandler
 from vnexis.lges.domain.event import KeyFrameDetected, KeyFrameDetectionDone
 
@@ -22,6 +23,7 @@ class TriggerTracker(DomainEventHandler[KeyFrameDetectionDone]):
     def __init__(
         self,
         session_id: int,
+        event_bus: EventBus = EventBus(),
         num_watch: int = 10,
         margin: int = 1,
         num_capture: int = 10,
@@ -33,7 +35,7 @@ class TriggerTracker(DomainEventHandler[KeyFrameDetectionDone]):
             margin (int): 트래커 상태 변화 허용 범위
             num_capture (int): 트리거 후 캡쳐 프레임 개수
         """
-        super().__init__(session_id)
+        super().__init__(session_id, event_bus)
         self.num_watch = num_watch
         self.margin = margin
         self.num_capture = num_capture
@@ -41,26 +43,29 @@ class TriggerTracker(DomainEventHandler[KeyFrameDetectionDone]):
         self.clear()
 
     def process(self, event: KeyFrameDetectionDone) -> None:
-        for box, label in zip(event.boxes, event.labels):
+        # self.logger.info(f"[TriggerTracker] Processing event: {event.session_id}")
+        value = None
+        for box, label in zip(event.result.boxes, event.result.labels):
             if int(label) == 1:
                 x1, y1, x2, y2 = map(int, box)
                 value = y1
                 break
+        # self.logger.info(f"[TriggerTracker] Processing value: {value}")
         if value is None:
             return None
         is_target = self.update(value)
         if not is_target:
             return None
 
-        self.logger.warning(
+        self.logger.info(
             f"[TriggerTracker] Trigger! Created Target. frame_idx: {event.raw_data.frame.idx}"
         )
         self._event_bus.publish(
             KeyFrameDetected(
-                session_id=self.session_id,
+                session_id=event.session_id,
                 raw_data=event.raw_data,
                 frame=event.raw_data.frame,
-                metadata=event.raw_data.metadata,
+                metadata=event.metadata,
             )
         )
 

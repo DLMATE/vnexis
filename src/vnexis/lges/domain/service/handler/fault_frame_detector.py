@@ -21,7 +21,7 @@ from vnexis.lges.domain.value_object import (
 class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
     def __init__(
         self,
-        session_id: int,
+        session_id: int | None,
         model_path: str,
         event_bus: EventBus,
         thresholds: list[float] = [],
@@ -67,9 +67,10 @@ class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
             is_defect = len(detection_result.boxes) > 0
             self._event_bus.publish(
                 FaultFrameDetectionDone(
-                    session_id=self._session_id,
+                    session_id=event.session_id,
                     raw_data=event.raw_data,
-                    preprocess_result=event.preprocess_result,
+                    frame=event.frame,
+                    metadata=event.metadata,
                     detect_result=FaultFrameDetectResult(
                         detection_result=detection_result,
                         time=e_time - s_time,
@@ -79,9 +80,10 @@ class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
             if is_defect:
                 self._event_bus.publish(
                     FaultFrameDetected(
-                        session_id=self._session_id,
+                        session_id=event.session_id,
                         raw_data=event.raw_data,
-                        preprocess_result=event.preprocess_result,
+                        frame=event.frame,
+                        metadata=event.metadata,
                         detect_result=FaultFrameDetectResult(
                             detection_result=detection_result,
                             time=e_time - s_time,

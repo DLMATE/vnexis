@@ -107,7 +107,7 @@ class FrameClipping(FrameBufferedHandler):
             self._event_bus.publish(
                 FramePendingDone(
                     session_id=event.session_id,
-                    key_idx=clip.key_frame_idx,
+                    key_frame_idx=clip.key_frame_idx,
                     frames=clip.frames,
                 )
             )

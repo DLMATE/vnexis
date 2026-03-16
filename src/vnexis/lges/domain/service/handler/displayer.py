@@ -8,14 +8,14 @@ import numpy as np
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 
-from vnexis.core.common.event import EventHandler
+from vnexis.core.common.event import AsyncEventHandler
 from vnexis.core.common.utils import draw_text_using_idx, resize_boxes
 from vnexis.lges.domain.event import KeyFrameDetectionDone
 
 logger = logging.getLogger(__name__)
 
 
-class WebDisplayer(EventHandler[KeyFrameDetectionDone]):
+class WebDisplayer(AsyncEventHandler[KeyFrameDetectionDone]):
     """
     FastAPI + MJPEG 스트리밍 기반 웹 디스플레이어.
     클라이언트별 독립 스트림을 제공합니다.
@@ -27,9 +27,11 @@ class WebDisplayer(EventHandler[KeyFrameDetectionDone]):
 
     def __init__(
         self,
+        max_workers: int = 1,
         width: int = 800,
         height: int = 600,
     ):
+        super().__init__(max_workers=max_workers)
         self._width = width
         self._height = height
 

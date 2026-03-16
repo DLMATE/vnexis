@@ -53,17 +53,20 @@ def main():
     image_saver = ImageSaver()
     video_requester = VideoRequester(frame_clipper_manager)
     video_saver = VideoSaver()
-    web_displayer = WebDisplayer()
+    web_displayer = WebDisplayer(max_workers=max_client)
+    fault_frame_detector = FaultFrameDetector(
+        None, fault_frame_model_path, global_event_bus, default_threshold=0.2
+    )
 
-    global_event_bus.subscribe(FrameCaptured, frame_buffering)
+    # global_event_bus.subscribe(FrameCaptured, frame_buffering)
     global_event_bus.subscribe(FrameBuffered, frame_clipping)
     global_event_bus.subscribe(FaultFrameDetected, image_saver)
     global_event_bus.subscribe(FaultFrameDetected, video_requester)
     global_event_bus.subscribe(FramePendingDone, video_saver)
-    # global_event_bus.subscribe(KeyFrameDetectionDone, web_displayer)
+    global_event_bus.subscribe(KeyFrameDetected, fault_frame_detector)
+    global_event_bus.subscribe(KeyFrameDetectionDone, web_displayer)
 
     collectors = []
-    displayers = []
     for client_id in range(max_client):
         frame_buffer_manager.add_buffer(client_id)
         frame_clipper_manager.add_frame_clipper(
@@ -71,16 +74,19 @@ def main():
         )
 
         collector = VideoReader(client_id, global_event_bus, video_path)
-        key_frame_detector = KeyFrameDetector(client_id, key_frame_model_path)
-        trigger_tracker = TriggerTracker(client_id)
-        fault_frame_detector = FaultFrameDetector(
-            client_id, fault_frame_model_path, global_event_bus, default_threshold=0.2
+        key_frame_detector = KeyFrameDetector(
+            client_id,
+            key_frame_model_path,
+            global_event_bus,
         )
+        trigger_tracker = TriggerTracker(client_id, global_event_bus)
+        # fault_frame_detector = FaultFrameDetector(
+        #     client_id, fault_frame_model_path, global_event_bus, default_threshold=0.2
+        # )
 
         collector.event_bus.subscribe(RawDataCollected, key_frame_detector)
+        collector.event_bus.subscribe(FrameCaptured, frame_buffering)
         key_frame_detector.event_bus.subscribe(KeyFrameDetectionDone, trigger_tracker)
-        key_frame_detector.event_bus.subscribe(KeyFrameDetectionDone, web_displayer)
-        trigger_tracker.event_bus.subscribe(KeyFrameDetected, fault_frame_detector)
 
         collectors.append(collector)
 

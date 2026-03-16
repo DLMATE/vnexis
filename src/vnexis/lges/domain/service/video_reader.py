@@ -66,6 +66,9 @@ class VideoReader(RawDataCollector):
             # logger.info(f"[{self._session_id}] FrameCaptured: {frame.idx}")
             idx += 1
 
+    def _process(self):
+        return super()._process()
+
     @property
     def stream(self):
         return self._stream
