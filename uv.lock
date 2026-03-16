@@ -6,12 +6,6 @@ resolution-markers = [
     "python_full_version < '3.14'",
 ]
 
-[manifest]
-members = [
-    "inference",
-    "ivs",
-]
-
 [[package]]
 name = "aioice"
 version = "0.10.2"
@@ -480,36 +474,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/ac/fb4c578f4a3256561548cd825646680edcadb9440f3f68add95ade1eb791/ifaddr-0.2.0.tar.gz", hash = "sha256:cc0cbfcaabf765d44595825fb96a99bb12c79716b73b44330ea38ee2b0c4aed4", size = 10485, upload-time = "2022-06-15T21:40:27.561Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9c/1f/19ebc343cc71a7ffa78f17018535adc5cbdd87afb31d7c34874680148b32/ifaddr-0.2.0-py3-none-any.whl", hash = "sha256:085e0305cfe6f16ab12d72e2024030f5d52674afad6911bb1eee207177b8a748", size = 12314, upload-time = "2022-06-15T21:40:25.756Z" },
-]
-
-[[package]]
-name = "inference"
-version = "0.1.0"
-source = { editable = "modules/inference" }
-
-[[package]]
-name = "ivs"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "aiortc" },
-    { name = "fastapi", extra = ["standard"] },
-    { name = "numpy" },
-    { name = "nvitop" },
-    { name = "onnxruntime-gpu" },
-    { name = "opencv-python" },
-    { name = "pyzmq" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiortc", specifier = ">=1.14.0" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.135.1" },
-    { name = "numpy", specifier = ">=2.4.2" },
-    { name = "nvitop", specifier = ">=1.6.2" },
-    { name = "onnxruntime-gpu", specifier = ">=1.24.1" },
-    { name = "opencv-python", specifier = ">=4.13.0.92" },
-    { name = "pyzmq", specifier = ">=27.1.0" },
 ]
 
 [[package]]
@@ -1250,6 +1214,31 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/37/945b4ca0ac27e3dc4952642d4c900edd030b3da6c9634875af6e13ae80e5/uvloop-0.22.1-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b91328c72635f6f9e0282e4a57da7470c7350ab1c9f48546c0f2866205349d21", size = 4467065, upload-time = "2025-10-16T22:16:58.206Z" },
     { url = "https://files.pythonhosted.org/packages/97/cc/48d232f33d60e2e2e0b42f4e73455b146b76ebe216487e862700457fbf3c/uvloop-0.22.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:daf620c2995d193449393d6c62131b3fbd40a63bf7b307a1527856ace637fe88", size = 4328384, upload-time = "2025-10-16T22:16:59.36Z" },
     { url = "https://files.pythonhosted.org/packages/e4/16/c1fd27e9549f3c4baf1dc9c20c456cd2f822dbf8de9f463824b0c0357e06/uvloop-0.22.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:6cde23eeda1a25c75b2e07d39970f3374105d5eafbaab2a4482be82f272d5a5e", size = 4296730, upload-time = "2025-10-16T22:17:00.744Z" },
+]
+
+[[package]]
+name = "vnexis"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "aiortc" },
+    { name = "fastapi", extra = ["standard"] },
+    { name = "numpy" },
+    { name = "nvitop" },
+    { name = "onnxruntime-gpu" },
+    { name = "opencv-python" },
+    { name = "pyzmq" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiortc", specifier = ">=1.14.0" },
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.135.1" },
+    { name = "numpy", specifier = ">=2.4.2" },
+    { name = "nvitop", specifier = ">=1.6.2" },
+    { name = "onnxruntime-gpu", specifier = ">=1.24.1" },
+    { name = "opencv-python", specifier = ">=4.13.0.92" },
+    { name = "pyzmq", specifier = ">=27.1.0" },
 ]
 
 [[package]]
