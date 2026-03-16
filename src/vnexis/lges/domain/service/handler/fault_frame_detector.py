@@ -4,6 +4,7 @@ from typing import Sequence
 import numpy as np
 import onnxruntime as ort
 
+from vnexis.core.common.event import EventBus
 from vnexis.core.common.utils import resize_image
 from vnexis.core.domain.event import Preprocessed
 from vnexis.core.domain.service.handler import PreprocessedHandler
@@ -22,10 +23,11 @@ class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
         self,
         session_id: int,
         model_path: str,
+        event_bus: EventBus,
         thresholds: list[float] = [],
         default_threshold: float = 0.7,
     ):
-        super().__init__(session_id)
+        super().__init__(session_id, event_bus)
 
         self._model_path = model_path
         self._thresholds = thresholds
@@ -55,7 +57,7 @@ class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
 
         self.img_size = self.session.get_inputs()[0].shape[2:]
 
-    def process(self, event: Preprocessed[LgesMetadata]) -> None:
+    def process(self, event: Preprocessed[FrameData, LgesMetadata]) -> None:
         try:
             s_time = time.perf_counter()
             img = self._preprocess(event.raw_data.frame)

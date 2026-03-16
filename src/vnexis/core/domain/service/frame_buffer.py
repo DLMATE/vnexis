@@ -2,7 +2,7 @@ import logging
 import threading
 from collections import deque
 
-from vnexis.core.dto import Frame
+from vnexis.core.domain.value_object import Frame
 
 logger = logging.getLogger(__name__)
 

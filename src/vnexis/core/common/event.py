@@ -27,7 +27,7 @@ class EventHandler(ABC, Generic[E]):
         pass
 
 
-class AsyncEventHandler(ABC, EventHandler, Generic[E]):
+class AsyncEventHandler(EventHandler[E]):
     def __init__(self, max_workers: int = 1):
         self._executor = ThreadPoolExecutor(
             max_workers=max_workers, thread_name_prefix=f"{self.__class__.__name__}"

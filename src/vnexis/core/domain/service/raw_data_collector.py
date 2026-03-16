@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 from abc import ABC, abstractmethod
@@ -6,6 +7,8 @@ from typing import Iterator, Literal
 from vnexis.core.common.event import EventBus
 from vnexis.core.domain.event import RawDataCollected
 from vnexis.core.domain.value_object import RawData
+
+logger = logging.getLogger(__name__)
 
 
 class RawDataCollector(ABC):
@@ -56,11 +59,12 @@ class RawDataCollector(ABC):
         self._thread.join()
 
     def _process(self):
-        for session_id, raw_data in enumerate(self.collect()):
+        for raw_data in self.collect():
             if not raw_data:
                 continue
-            event = RawDataCollected(session_id=session_id, raw_data=raw_data)
+            event = RawDataCollected(session_id=self._session_id, raw_data=raw_data)
             self._event_bus.publish(event)
+            # logger.info(f"[{self._session_id}] RawDataCollected: {session_id}")
             if not self._is_running:
                 break
             time.sleep(self._delay)
@@ -68,3 +72,7 @@ class RawDataCollector(ABC):
     @property
     def is_running(self) -> bool:
         return self._is_running
+
+    @property
+    def event_bus(self) -> EventBus:
+        return self._event_bus

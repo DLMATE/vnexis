@@ -10,18 +10,18 @@ from vnexis.core.domain.value_object import (
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class FrameData(RawData):
     frame: Frame
 
 
-@dataclass
+@dataclass(frozen=True)
 class LgesMetadata(Metadata):
     cell_id: str
     key_frame_detect_time: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class DetectionResultDto:
     boxes: np.ndarray
     labels: np.ndarray
@@ -30,7 +30,7 @@ class DetectionResultDto:
     img_size: tuple[int, int]
 
 
-@dataclass
+@dataclass(frozen=True)
 class FaultFrameDetectResult(DetectResult):
     detection_result: DetectionResultDto
     time: float

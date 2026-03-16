@@ -1,29 +1,35 @@
 import logging
-import time
 
-import cv2
-
-from vnexis.common.event import get_glboal_event_bus
-from vnexis.core.event import (
-    DefectDetected,
+from vnexis.core.common.event import get_glboal_event_bus
+from vnexis.core.domain.event import (
     FrameBuffered,
     FrameCaptured,
     FramePendingDone,
-    Preprocessed,
     RawDataCollected,
-    TargetCreated,
 )
-from vnexis.core.service.frame_buffer import FrameBufferHandler, FrameBufferManager
-from vnexis.core.service.frame_clipper import FrameClipperHandler, FrameClipperManager
-
-from .collector import AvSourceGateway
-from .detector import FaultFrameDetector
-from .displayer import Displayer
-from .postprocessor import ImageSaver, VideoRequester, VideoSaver
-from .preprocessor import KeyFrameDetector
-from .target_creator import TriggerTracker
+from vnexis.core.domain.service.frame_buffer import FrameBufferManager
+from vnexis.core.domain.service.frame_clipper import FrameClipperManager
+from vnexis.core.domain.service.handler import FrameBuffering, FrameClipping
+from vnexis.lges.domain.event import (
+    FaultFrameDetected,
+    KeyFrameDetected,
+    KeyFrameDetectionDone,
+)
+from vnexis.lges.domain.service.handler import (
+    FaultFrameDetector,
+    ImageSaver,
+    KeyFrameDetector,
+    TriggerTracker,
+    VideoRequester,
+    VideoSaver,
+    WebDisplayer,
+)
+from vnexis.lges.domain.service.video_reader import VideoReader
 
 logging.basicConfig(level=logging.INFO)
+import uvicorn
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -32,24 +38,29 @@ def main():
     video_path = "C://workspace//stream_inspection//assets//hm_anvil//video//5s, no 14 pallete.mp4"
     key_frame_model_path = "C://workspace//stream_inspection//assets//hm_anvil//trigger//trigger_yolonas_s_v1.0.onnx"
     fault_frame_model_path = "C://workspace//stream_inspection//assets//hm_anvil//defect//YoloNAS_Seg_S_v1.1.onnx"
-    event_bus = get_glboal_event_bus()
+    global_event_bus = get_glboal_event_bus()
 
     frame_buffer_manager = FrameBufferManager()
-    frame_buffer_handler = FrameBufferHandler(event_bus, frame_buffer_manager)
-
     frame_clipper_manager = FrameClipperManager()
-    frame_clipper_manager.add_frame_clipper
-    frame_clipper_handler = FrameClipperHandler(event_bus, frame_clipper_manager)
 
-    image_saver = ImageSaver(event_bus)
-    video_requester = VideoRequester(event_bus, frame_clipper_manager)
-    video_saver = VideoSaver(event_bus)
+    frame_buffering = FrameBuffering(
+        event_bus=global_event_bus, frame_buffer_manager=frame_buffer_manager
+    )
+    frame_clipping = FrameClipping(
+        event_bus=global_event_bus, frame_clipper_manager=frame_clipper_manager
+    )
 
-    event_bus.subscribe(FrameCaptured, frame_buffer_handler)
-    event_bus.subscribe(FrameBuffered, frame_clipper_handler)
-    event_bus.subscribe(DefectDetected, image_saver)
-    event_bus.subscribe(DefectDetected, video_requester)
-    event_bus.subscribe(FramePendingDone, video_saver)
+    image_saver = ImageSaver()
+    video_requester = VideoRequester(frame_clipper_manager)
+    video_saver = VideoSaver()
+    web_displayer = WebDisplayer()
+
+    global_event_bus.subscribe(FrameCaptured, frame_buffering)
+    global_event_bus.subscribe(FrameBuffered, frame_clipping)
+    global_event_bus.subscribe(FaultFrameDetected, image_saver)
+    global_event_bus.subscribe(FaultFrameDetected, video_requester)
+    global_event_bus.subscribe(FramePendingDone, video_saver)
+    # global_event_bus.subscribe(KeyFrameDetectionDone, web_displayer)
 
     collectors = []
     displayers = []
@@ -59,40 +70,33 @@ def main():
             client_id, frame_buffer_manager.get_buffer(client_id)
         )
 
-        collector = AvSourceGateway(client_id, video_path, event_bus)
-        key_frame_detector = KeyFrameDetector(
-            client_id, key_frame_model_path, event_bus
-        )
-        trigger_tracker = TriggerTracker(client_id, event_bus)
+        collector = VideoReader(client_id, global_event_bus, video_path)
+        key_frame_detector = KeyFrameDetector(client_id, key_frame_model_path)
+        trigger_tracker = TriggerTracker(client_id)
         fault_frame_detector = FaultFrameDetector(
-            client_id, fault_frame_model_path, event_bus, default_threshold=0.2
+            client_id, fault_frame_model_path, global_event_bus, default_threshold=0.2
         )
 
-        event_bus.subscribe(RawDataCollected, key_frame_detector)
-        event_bus.subscribe(Preprocessed, trigger_tracker)
-
-        event_bus.subscribe(TargetCreated, fault_frame_detector)
+        collector.event_bus.subscribe(RawDataCollected, key_frame_detector)
+        key_frame_detector.event_bus.subscribe(KeyFrameDetectionDone, trigger_tracker)
+        key_frame_detector.event_bus.subscribe(KeyFrameDetectionDone, web_displayer)
+        trigger_tracker.event_bus.subscribe(KeyFrameDetected, fault_frame_detector)
 
         collectors.append(collector)
 
-    displayer = Displayer(0, event_bus)
-    event_bus.subscribe(Preprocessed, displayer)
-    displayers.append(displayer)
-
+    # ── Collector 시작 ──
     for collector in collectors:
         collector.connect()
         video_saver.set_input_stream(collector.stream)
         collector.start()
-    # for displayer in displayers:
-    displayer.show()
 
-    while displayer.is_running:
-        time.sleep(0.1)
+    # ── FastAPI 서버 시작 (메인 스레드) ──
+    logger.info("[Main] http://localhost:8080 에서 모니터링")
+    uvicorn.run(web_displayer.app, host="0.0.0.0", port=8080, log_level="warning")
 
+    # ── 종료 ──
     for collector in collectors:
         collector.disconnect()
-    cv2.destroyAllWindows()
-    exit(0)
 
 
 if __name__ == "__main__":

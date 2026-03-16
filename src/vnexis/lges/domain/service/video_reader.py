@@ -3,18 +3,19 @@ from typing import Iterator
 
 import av
 import av.datasets
-from vnexis.core.dto import Frame
-from vnexis.core.event import FrameCaptured
 
+from vnexis.core.common.event import EventBus
+from vnexis.core.domain.event import FrameCaptured
 from vnexis.core.domain.service.raw_data_collector import RawDataCollector
-from vnexis.lges.dto import LgesRawData
+from vnexis.core.domain.value_object import Frame
+from vnexis.lges.domain.value_object import FrameData
 
 logger = logging.getLogger(__name__)
 
 
 class VideoReader(RawDataCollector):
-    def __init__(self, session_id: int, path: str):
-        super().__init__(session_id, "video", path)
+    def __init__(self, session_id: int, event_bus: EventBus, path: str):
+        super().__init__(session_id, "video", path, event_bus)
 
         self._container = None
         self._stream = None
@@ -46,7 +47,7 @@ class VideoReader(RawDataCollector):
         self._is_running = False
         self._thread.join()
 
-    def collect(self) -> Iterator[LgesRawData | None]:
+    def collect(self) -> Iterator[FrameData | None]:
         idx = 0
         for packet in self._container.demux(self._stream):
             if packet.size == 0 or packet.dts is None:
@@ -58,14 +59,11 @@ class VideoReader(RawDataCollector):
                 continue
                 # raise Exception(f"frame data size is not 1. size: {len(data)}")
             frame = Frame(idx=idx, raw=packet, data=data[0].to_ndarray(format="bgr24"))
-            yield LgesRawData(
-                frame=Frame(
-                    idx=idx, raw=packet, data=data[0].to_ndarray(format="bgr24")
-                )
-            )
+            yield FrameData(frame=frame)
             self._event_bus.publish(
-                FrameCaptured(client_id=self._client_id, session_id=idx, frame=frame)
+                FrameCaptured(session_id=self._session_id, frame=frame)
             )
+            # logger.info(f"[{self._session_id}] FrameCaptured: {frame.idx}")
             idx += 1
 
     @property

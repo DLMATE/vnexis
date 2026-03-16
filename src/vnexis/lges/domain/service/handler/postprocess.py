@@ -7,22 +7,23 @@ import av
 import cv2
 
 from vnexis.core.common.event import AsyncEventHandler, EventHandler
-from vnexis.core.domain.event import DefectDetected, FramePendingDone
+from vnexis.core.domain.event import FramePendingDone
 from vnexis.core.domain.service.frame_clipper import FrameClipperManager
+from vnexis.lges.domain.event import FaultFrameDetected
 
 logger = logging.getLogger(__name__)
 
 
-class VideoRequester(EventHandler[DefectDetected]):
+class VideoRequester(EventHandler[FaultFrameDetected]):
     def __init__(self, frame_clipper_manager: FrameClipperManager):
         self._frame_clipper_manager = frame_clipper_manager
 
-    def process(self, event: DefectDetected):
+    def process(self, event: FaultFrameDetected):
         self._frame_clipper_manager.request_clip(event.session_id, event.frame.idx)
 
 
-class ImageSaver(AsyncEventHandler[DefectDetected]):
-    def process(self, event: DefectDetected):
+class ImageSaver(AsyncEventHandler[FaultFrameDetected]):
+    def process(self, event: FaultFrameDetected):
         path = Path("output") / str(event.session_id) / f"{event.frame.idx}.png"
         os.makedirs(path.parent, exist_ok=True)
         cv2.imwrite(path, event.frame.data)

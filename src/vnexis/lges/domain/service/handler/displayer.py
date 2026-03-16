@@ -7,9 +7,9 @@ import cv2
 import numpy as np
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
-from vnexis.common.utils import draw_text_using_idx, resize_boxes
 
 from vnexis.core.common.event import EventHandler
+from vnexis.core.common.utils import draw_text_using_idx, resize_boxes
 from vnexis.lges.domain.event import KeyFrameDetectionDone
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,8 @@ class WebDisplayer(EventHandler[KeyFrameDetectionDone]):
             self._locks[client_id] = threading.Lock()
             self._client_ids.add(client_id)
 
-    def handle(self, event: KeyFrameDetectionDone):
+    def process(self, event: KeyFrameDetectionDone):
+        # self.logger.info(f"[WebDisplayer] Processing event: {event.session_id}")
         client_id = event.session_id
         self._ensure_client(client_id)
 
@@ -77,13 +78,13 @@ class WebDisplayer(EventHandler[KeyFrameDetectionDone]):
         boxes = resize_boxes(
             event.result.boxes,
             event.result.img_size,
-            (event.result.frame.height, event.result.frame.width),
+            (event.raw_data.frame.height, event.raw_data.frame.width),
             keep_aspect_ratio=True,
             inverse=True,
         )
         boxes = resize_boxes(
             boxes,
-            (event.result.frame.height, event.result.frame.width),
+            (event.raw_data.frame.height, event.raw_data.frame.width),
             (self._height, self._width),
             keep_aspect_ratio=False,
             inverse=False,

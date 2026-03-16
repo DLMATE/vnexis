@@ -2,8 +2,8 @@ import logging
 import threading
 from dataclasses import dataclass, field
 
-from vnexis.core.dto import Frame
-from vnexis.core.service.frame_buffer import FrameBuffer
+from vnexis.core.domain.service.frame_buffer import FrameBuffer
+from vnexis.core.domain.value_object import Frame
 
 logger = logging.getLogger(__name__)
 
