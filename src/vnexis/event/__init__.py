@@ -16,6 +16,7 @@ __all__ = [
     "print_full_flow",
     "generate_mermaid_flow",
     "save_mermaid_flow",
+    "EventHandled",
 ]
 
 
@@ -34,6 +35,7 @@ from .event import (
     DefectDetected,
     DetectionDone,
     DomainEvent,
+    EventHandled,
     FrameBuffered,
     FrameCaptured,
     FramePendingDone,

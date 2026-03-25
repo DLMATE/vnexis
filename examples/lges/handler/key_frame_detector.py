@@ -8,7 +8,6 @@ import onnxruntime as ort
 from lges.event import KeyFrameDetectionDone
 from lges.vo import (
     DetectionResultDto,
-    FrameData,
     LgesMetadata,
 )
 from vnexis.event import EventBus, RawDataCollected
@@ -17,14 +16,14 @@ from vnexis.utils import resize_image
 from vnexis.vo import Frame
 
 
-class KeyFrameDetector(RawDataCollectedHandler[FrameData]):
+class KeyFrameDetector(RawDataCollectedHandler[Frame]):
     publishes = [KeyFrameDetectionDone]
 
     def __init__(
         self,
         session_id: int,
         model_path: str,
-        event_bus: EventBus,
+        event_bus: EventBus | None = None,
         thresholds: list[float] = [],
         default_threshold: float = 0.7,
     ):
@@ -58,16 +57,16 @@ class KeyFrameDetector(RawDataCollectedHandler[FrameData]):
 
         self.img_size = self.session.get_inputs()[0].shape[2:]
 
-    def process(self, event: RawDataCollected[FrameData]) -> None:
+    def process(self, event: RawDataCollected[Frame]) -> None:
         try:
             s_time = time.perf_counter()
-            img = self._preprocess(event.raw_data.frame)
+            img = self._preprocess(event.raw_data)
             outputs = self.session.run(self.output_names, {self.input_name: img})
             detection_result = self._postprocess(outputs)
             e_time = time.perf_counter()
-            # logger.info(
-            #     f"client_id: {self._client_id}, frame_idx: {raw_data.frame.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {e_time - s_time}"
-            # )
+            self.logger.info(
+                f"client_id: {self._session_id}, frame_idx: {event.raw_data.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {(e_time - s_time) * 1000:.2f} ms"
+            )
             metadata = LgesMetadata(
                 cell_id=str(uuid4()), key_frame_detect_time=e_time - s_time
             )

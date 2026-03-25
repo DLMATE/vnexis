@@ -60,13 +60,13 @@ class TriggerTracker(DomainEventHandler[KeyFrameDetectionDone]):
             return None
 
         self.logger.info(
-            f"[TriggerTracker] Trigger! Created Target. frame_idx: {event.raw_data.frame.idx}"
+            f"[TriggerTracker] Trigger! Created Target. frame_idx: {event.raw_data.idx}"
         )
         self._event_bus.publish(
             KeyFrameDetected(
                 session_id=event.session_id,
                 raw_data=event.raw_data,
-                frame=event.raw_data.frame,
+                frame=event.raw_data,
                 metadata=event.metadata,
             )
         )

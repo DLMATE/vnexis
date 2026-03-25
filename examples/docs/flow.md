@@ -2,95 +2,91 @@
 
 ```mermaid
 graph TD
-    h15937f[FaultFrameDetector]
-    he0ccee[FaultFrameSaver]
-    he0ce3e[VideoRequester]
-    he0d0de[WebDisplayer]
-    he0c7ae[FrameBuffering]
-    he0cb9e[FrameClipping]
-    he0cf8e[VideoSaver]
+    hf7afdc[FaultFrameDetector]
+    hec655c[DefectDetectedFrameSaver]
+    hec6bec[VideoRequester]
+    hec6d3c[WebDisplayer]
+    hec66ac[FrameBufferManager]
+    hec6a9c[VideoSaver]
     ev3([FaultFrameDetected : DefectDetected])
-    ev5([FrameBuffered])
-    ev6([FramePendingDone])
+    ev5([FramePendingDone])
 
     subgraph "Session 0"
-        h1598bf[VideoReader 0]
-        h159b5f[KeyFrameDetector 0]
-        h159caf[TriggerTracker 0]
+        hec5ecc[VideoReader 0]
+        hf7b27c[KeyFrameDetector 0]
+        hf7b3cc[TriggerTracker 0]
         ev0([RawDataCollected])
         ev1([KeyFrameDetectionDone])
         ev2([KeyFrameDetected])
         ev4([FrameCaptured])
     end
     subgraph "Session 1"
-        h11617f[VideoReader 1]
-        h21a57f[KeyFrameDetector 1]
-        h21a7ff[TriggerTracker 1]
-        ev7([RawDataCollected])
-        ev8([KeyFrameDetectionDone])
-        ev9([KeyFrameDetected])
-        ev10([FrameCaptured])
+        he8a0ec[VideoReader 1]
+        hf8a86c[KeyFrameDetector 1]
+        hf8aaec[TriggerTracker 1]
+        ev6([RawDataCollected])
+        ev7([KeyFrameDetectionDone])
+        ev8([KeyFrameDetected])
+        ev9([FrameCaptured])
     end
     subgraph "Session 2"
-        h21abbf[VideoReader 2]
-        h21ae3f[KeyFrameDetector 2]
-        h21af7f[TriggerTracker 2]
-        ev11([RawDataCollected])
-        ev12([KeyFrameDetectionDone])
-        ev13([KeyFrameDetected])
-        ev14([FrameCaptured])
+        he8a5ec[VideoReader 2]
+        hf8ac2c[KeyFrameDetector 2]
+        hf8ad6c[TriggerTracker 2]
+        ev10([RawDataCollected])
+        ev11([KeyFrameDetectionDone])
+        ev12([KeyFrameDetected])
+        ev13([FrameCaptured])
     end
     subgraph "Session 3"
-        h1d7acf[VideoReader 3]
-        h1d7e5f[KeyFrameDetector 3]
-        h1d80bf[TriggerTracker 3]
-        ev15([RawDataCollected])
-        ev16([KeyFrameDetectionDone])
-        ev17([KeyFrameDetected])
-        ev18([FrameCaptured])
+        he23a6c[VideoReader 3]
+        h03c75d[KeyFrameDetector 3]
+        h03caed[TriggerTracker 3]
+        ev14([RawDataCollected])
+        ev15([KeyFrameDetectionDone])
+        ev16([KeyFrameDetected])
+        ev17([FrameCaptured])
     end
 
-    h1598bf --> ev0
-    ev0 --> h159b5f
-    h159b5f --> ev1
-    ev1 --> h159caf
-    ev1 --> he0d0de
-    h159caf --> ev2
-    ev2 --> h15937f
-    h15937f --> ev3
-    ev3 --> he0ccee
-    ev3 --> he0ce3e
-    h1598bf --> ev4
-    ev4 --> he0c7ae
-    he0c7ae --> ev5
-    ev5 --> he0cb9e
-    he0cb9e --> ev6
-    ev6 --> he0cf8e
-    h11617f --> ev7
-    ev7 --> h21a57f
-    h21a57f --> ev8
-    ev8 --> h21a7ff
-    ev8 --> he0d0de
-    h21a7ff --> ev9
-    ev9 --> h15937f
-    h11617f --> ev10
-    ev10 --> he0c7ae
-    h21abbf --> ev11
-    ev11 --> h21ae3f
-    h21ae3f --> ev12
-    ev12 --> h21af7f
-    ev12 --> he0d0de
-    h21af7f --> ev13
-    ev13 --> h15937f
-    h21abbf --> ev14
-    ev14 --> he0c7ae
-    h1d7acf --> ev15
-    ev15 --> h1d7e5f
-    h1d7e5f --> ev16
-    ev16 --> h1d80bf
-    ev16 --> he0d0de
-    h1d80bf --> ev17
-    ev17 --> h15937f
-    h1d7acf --> ev18
-    ev18 --> he0c7ae
+    hec5ecc --> ev0
+    ev0 --> hf7b27c
+    hf7b27c --> ev1
+    ev1 --> hf7b3cc
+    ev1 --> hec6d3c
+    hf7b3cc --> ev2
+    ev2 --> hf7afdc
+    hf7afdc --> ev3
+    ev3 --> hec655c
+    ev3 --> hec6bec
+    hec5ecc --> ev4
+    ev4 --> hec66ac
+    hec66ac --> ev5
+    ev5 --> hec6a9c
+    he8a0ec --> ev6
+    ev6 --> hf8a86c
+    hf8a86c --> ev7
+    ev7 --> hf8aaec
+    ev7 --> hec6d3c
+    hf8aaec --> ev8
+    ev8 --> hf7afdc
+    he8a0ec --> ev9
+    ev9 --> hec66ac
+    he8a5ec --> ev10
+    ev10 --> hf8ac2c
+    hf8ac2c --> ev11
+    ev11 --> hf8ad6c
+    ev11 --> hec6d3c
+    hf8ad6c --> ev12
+    ev12 --> hf7afdc
+    he8a5ec --> ev13
+    ev13 --> hec66ac
+    he23a6c --> ev14
+    ev14 --> h03c75d
+    h03c75d --> ev15
+    ev15 --> h03caed
+    ev15 --> hec6d3c
+    h03caed --> ev16
+    ev16 --> hf7afdc
+    he23a6c --> ev17
+    ev17 --> hec66ac
 ```

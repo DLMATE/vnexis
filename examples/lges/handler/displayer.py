@@ -69,24 +69,24 @@ class WebDisplayer(AsyncEventHandler[KeyFrameDetectionDone]):
             self._frames[client_id] = jpeg.tobytes()
             self._metadata[client_id] = {
                 "client_id": client_id,
-                "frame_idx": event.raw_data.frame.idx,
+                "frame_idx": event.raw_data.idx,
                 "cell_id": event.metadata.cell_id,
                 "key_frame_detect_time": f"{event.metadata.key_frame_detect_time:.3f}",
             }
 
     def _render_frame(self, client_id: int, event: KeyFrameDetectionDone) -> np.ndarray:
-        data = cv2.resize(event.raw_data.frame.data, (self._width, self._height))
+        data = cv2.resize(event.raw_data.data, (self._width, self._height))
 
         boxes = resize_boxes(
             event.result.boxes,
             event.result.img_size,
-            (event.raw_data.frame.height, event.raw_data.frame.width),
+            (event.raw_data.height, event.raw_data.width),
             keep_aspect_ratio=True,
             inverse=True,
         )
         boxes = resize_boxes(
             boxes,
-            (event.raw_data.frame.height, event.raw_data.frame.width),
+            (event.raw_data.height, event.raw_data.width),
             (self._height, self._width),
             keep_aspect_ratio=False,
             inverse=False,
@@ -107,9 +107,7 @@ class WebDisplayer(AsyncEventHandler[KeyFrameDetectionDone]):
                 2,
             )
 
-        data = draw_text_using_idx(
-            data, f"idx: {event.raw_data.frame.idx}", 0, (0, 255, 0)
-        )
+        data = draw_text_using_idx(data, f"idx: {event.raw_data.idx}", 0, (0, 255, 0))
         data = draw_text_using_idx(
             data, f"cell_id: {event.metadata.cell_id}", 1, (0, 255, 0)
         )
@@ -158,7 +156,7 @@ class WebDisplayer(AsyncEventHandler[KeyFrameDetectionDone]):
                     jpeg = self._frames.get(client_id)
             if jpeg:
                 yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n")
-            await asyncio.sleep(0.033)
+            await asyncio.sleep(0.001)
 
 
 INDEX_HTML = """<!DOCTYPE html>

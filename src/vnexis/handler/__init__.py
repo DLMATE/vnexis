@@ -1,33 +1,35 @@
+from .defect_detected_frame_saver import DefectDetectedFrameSaver
 from .frame_buffer import FrameBuffer, FrameBufferManager
-from .frame_clipper import FrameClipper, FrameClipperManager
 from .handler import (
     DefectDetectedHandler,
     DetectionDoneHandler,
     DomainEventHandler,
     FrameBufferedHandler,
-    FrameBuffering,
     FrameCapturedHandler,
-    FrameClipping,
     FramePendingDoneHandler,
     PreprocessedHandler,
     RawDataCollectedHandler,
+    StatisticsManager,
 )
-from .raw_data_collector import RawDataCollector
+from .raw_data_collector import RawDataCollector, VideoReader
+from .video_requester import VideoRequester
+from .video_saver import VideoSaver
 
 __all__ = [
     "FrameBuffer",
     "FrameBufferManager",
-    "FrameClipper",
-    "FrameClipperManager",
+    "DefectDetectedFrameSaver",
+    "VideoSaver",
     "DomainEventHandler",
     "RawDataCollectedHandler",
     "PreprocessedHandler",
     "DetectionDoneHandler",
     "DefectDetectedHandler",
     "FrameCapturedHandler",
-    "FrameBuffering",
     "FrameBufferedHandler",
-    "FrameClipping",
     "FramePendingDoneHandler",
     "RawDataCollector",
+    "StatisticsManager",
+    "VideoReader",
+    "VideoRequester",
 ]

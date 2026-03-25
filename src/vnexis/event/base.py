@@ -3,12 +3,13 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Generic, TypeVar
+from typing import Generic, Literal, TypeVar
 
 TEvent = TypeVar("TEvent", bound="Event")
+# TDomainEvent = TypeVar("TDomainEvent", bound="DomainEvent")
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -22,7 +23,7 @@ class EventHandler(ABC, Generic[TEvent]):
 
     def handle(self, event: TEvent):
         try:
-            self.process(event)
+            self._run(event)
         except Exception:
             self.logger.exception(
                 f"[{self.__class__.__name__}] Error processing {type(event).__name__}"
@@ -32,19 +33,33 @@ class EventHandler(ABC, Generic[TEvent]):
     def process(self, event: TEvent):
         pass
 
+    def _run(self, event: TEvent):
+        self.process(event)
+
 
 class AsyncEventHandler(EventHandler[TEvent]):
-    def __init__(self, max_workers: int = 1):
-        self._executor = ThreadPoolExecutor(
-            max_workers=max_workers, thread_name_prefix=f"{self.__class__.__name__}"
-        )
+    def __init__(
+        self, max_workers: int = 1, type: Literal["thread", "process"] = "thread"
+    ):
+        if type == "thread":
+            self._executor = ThreadPoolExecutor(
+                max_workers=max_workers, thread_name_prefix=f"{self.__class__.__name__}"
+            )
+        else:
+            self._executor = ProcessPoolExecutor(max_workers=max_workers)
 
     def __del__(self):
-        self._executor.shutdown()
-        self.logger.info(f"Shutdown {self.__class__.__name__}")
+        self._executor.shutdown(wait=True)
+        try:
+            self.logger.info(f"Shutdown {self.__class__.__name__}")
+        except Exception:
+            print(f"Shutdown {self.__class__.__name__}")
 
     def handle(self, event: TEvent):
-        self._executor.submit(super().handle, event)
+        try:
+            self._executor.submit(super().handle, event)
+        except RuntimeError:
+            pass
 
     @abstractmethod
     def process(self, event: TEvent):
@@ -69,7 +84,14 @@ class EventBus:
 
     def publish(self, event: Event, session_id: int | None = None):
         for cls in type(event).__mro__:
-            for event_handler in self._subscribers[session_id].get(cls.__name__, []):
+            # session-scoped subscribers
+            if session_id is not None:
+                for event_handler in self._subscribers[session_id].get(
+                    cls.__name__, []
+                ):
+                    event_handler.handle(event)
+            # global subscribers
+            for event_handler in self._subscribers[None].get(cls.__name__, []):
                 event_handler.handle(event)
 
 
@@ -79,6 +101,51 @@ event_bus = EventBus()
 
 def get_glboal_event_bus():
     return event_bus
+
+
+# @dataclass(kw_only=True, frozen=True)
+# class DomainEvent(Event):
+#     session_id: int
+
+
+# @dataclass(kw_only=True, frozen=True)
+# class EventHandled(DomainEvent):
+#     name: str
+#     duration: float
+
+
+# class DomainHandlerMixin(Generic[TDomainEvent]):
+#     def __init__(
+#         self, event_bus: EventBus = event_bus, session_id: int | None = None
+#     ) -> None:
+#         self._event_bus = event_bus
+#         self._session_id = session_id
+
+#     def _run(self, event: TDomainEvent):
+#         s = time.perf_counter()
+#         super()._run(event)
+#         e = time.perf_counter()
+#         self._event_bus.publish(
+#             EventHandled(
+#                 session_id=event.session_id,
+#                 name=self.__class__.__name__,
+#                 duration=e - s,
+#             )
+#         )
+
+#     @property
+#     def event_bus(self) -> EventBus:
+#         return self._event_bus
+
+
+# class DomainEventHandler(DomainHandlerMixin[TDomainEvent], EventHandler[TDomainEvent]):
+#     pass
+
+
+# class DomainEventHandler(
+#     DomainHandlerMixin[TDomainEvent], AsyncEventHandler[TDomainEvent]
+# ):
+#     pass
 
 
 # ── Flow Diagram ──────────────────────────────────────────

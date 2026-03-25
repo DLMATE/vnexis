@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from lges.vo import (
     DetectionResultDto,
     FaultFrameDetectResult,
-    FrameData,
     LgesMetadata,
 )
 from vnexis.event import (
@@ -19,26 +18,27 @@ from vnexis.event import (
     DomainEvent,
     Preprocessed,
 )
+from vnexis.vo import Frame
 
 
 @dataclass(kw_only=True, frozen=True)
 class KeyFrameDetectionDone(DomainEvent):
-    raw_data: FrameData
+    raw_data: Frame
     metadata: LgesMetadata
     result: DetectionResultDto
 
 
 @dataclass(kw_only=True, frozen=True)
-class KeyFrameDetected(Preprocessed[FrameData, LgesMetadata]): ...
+class KeyFrameDetected(Preprocessed[Frame, LgesMetadata]): ...
 
 
 @dataclass(kw_only=True, frozen=True)
 class FaultFrameDetectionDone(
-    DetectionDone[FrameData, LgesMetadata, FaultFrameDetectResult]
+    DetectionDone[Frame, LgesMetadata, FaultFrameDetectResult]
 ): ...
 
 
 @dataclass(kw_only=True, frozen=True)
 class FaultFrameDetected(
-    DefectDetected[FrameData, LgesMetadata, FaultFrameDetectResult]
+    DefectDetected[Frame, LgesMetadata, FaultFrameDetectResult]
 ): ...

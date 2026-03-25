@@ -2,35 +2,41 @@ import logging
 import os
 import time
 from pathlib import Path
+from typing import Literal
 
 import av
 
-from vnexis.event import AsyncEventHandler, FramePendingDone
+from vnexis.event import EventBus, FramePendingDone
+from vnexis.handler.handler import FramePendingDoneHandler
 
 logger = logging.getLogger(__name__)
 
 
-class VideoSaver(AsyncEventHandler[FramePendingDone]):
-    def __init__(self, max_workers: int = 1):
-        super().__init__(max_workers)
-        self._input_stream = None
-
-    def set_input_stream(self, stream: av.VideoStream):
-        self._input_stream = stream
+class VideoSaver(FramePendingDoneHandler):
+    def __init__(
+        self,
+        save_dir: Path,
+        event_bus: EventBus | None = None,
+        session_id: int | None = None,
+        max_workers: int = 1,
+        type: Literal["thread", "process"] = "thread",
+    ):
+        super().__init__(event_bus, session_id, max_workers, type)
+        self._save_dir = save_dir
 
     def process(self, event: FramePendingDone):
         try:
-            path = Path("output") / str(event.session_id) / f"{event.key_frame_idx}.mp4"
+            path = self._save_dir / str(event.session_id) / f"{event.key_frame_idx}.mp4"
             os.makedirs(path.parent, exist_ok=True)
 
             output_container = av.open(path, mode="w")
             output_stream = output_container.add_stream_from_template(
-                self._input_stream
+                event.av_input_stream
             )
             # output_stream.codec_tag = "hvc1"
-            output_stream.codec_tag = self._input_stream.codec_tag
+            output_stream.codec_tag = event.av_input_stream.codec_tag
             logger.info(
-                f"{event.key_frame_idx}'s input stream.\ntimebase: {self._input_stream.time_base}\nstarttime: {self._input_stream.start_time}\nduration: {self._input_stream.duration}, "
+                f"{event.key_frame_idx}'s input stream.\ntimebase: {event.av_input_stream.time_base}\nstarttime: {event.av_input_stream.start_time}\nduration: {event.av_input_stream.duration}, "
             )
             logger.info(
                 f"{event.key_frame_idx}'s output stream.\ntimebase: {output_stream.time_base}\nstarttime: {output_stream.start_time}\nduration: {output_stream.duration}, "
@@ -39,7 +45,7 @@ class VideoSaver(AsyncEventHandler[FramePendingDone]):
             logger.info(
                 f"[AvVideoSaver] video save started: {event.key_frame_idx}. len: {len(event.frames)}"
             )
-            output_stream.time_base = self._input_stream.time_base
+            output_stream.time_base = event.av_input_stream.time_base
             # output_stream.duration = event.frames[0].data.duration * len(event.frames)
             # output_stream.start_time = event.frames[0].data.dts
 

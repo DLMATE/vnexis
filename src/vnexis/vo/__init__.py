@@ -21,7 +21,7 @@ class RawData: ...
 
 
 @dataclass(frozen=True)
-class Frame:
+class Frame(RawData):
     idx: int
     raw: str | bytes | np.ndarray | av.Packet
     data: bytes | np.ndarray

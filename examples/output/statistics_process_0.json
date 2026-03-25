@@ -1,0 +1,54 @@
+{
+  "FrameBufferManager": {
+    "0": {
+      "count": 861,
+      "total_sec": 0.125533,
+      "avg_sec": 0.000146,
+      "std_sec": 0.000187,
+      "median_sec": 0.000125,
+      "p95_sec": 0.000488,
+      "p99_sec": 0.000911,
+      "min_sec": 5e-06,
+      "max_sec": 0.002011
+    }
+  },
+  "TriggerTracker": {
+    "0": {
+      "count": 855,
+      "total_sec": 0.129387,
+      "avg_sec": 0.000151,
+      "std_sec": 0.000673,
+      "median_sec": 0.000101,
+      "p95_sec": 0.000236,
+      "p99_sec": 0.000592,
+      "min_sec": 1.2e-05,
+      "max_sec": 0.018867
+    }
+  },
+  "KeyFrameDetector": {
+    "0": {
+      "count": 855,
+      "total_sec": 35.794558,
+      "avg_sec": 0.041865,
+      "std_sec": 0.037201,
+      "median_sec": 0.040143,
+      "p95_sec": 0.054287,
+      "p99_sec": 0.072834,
+      "min_sec": 0.022444,
+      "max_sec": 1.09408
+    }
+  },
+  "FaultFrameDetector": {
+    "0": {
+      "count": 8,
+      "total_sec": 1.657194,
+      "avg_sec": 0.207149,
+      "std_sec": 0.40678,
+      "median_sec": 0.067404,
+      "p95_sec": 0.816888,
+      "p99_sec": 1.134085,
+      "min_sec": 0.041791,
+      "max_sec": 1.213385
+    }
+  }
+}

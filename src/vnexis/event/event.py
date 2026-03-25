@@ -7,10 +7,13 @@ __all__ = [
     "FrameCaptured",
     "FrameBuffered",
     "FramePendingDone",
+    "EventHandled",
 ]
 
 from dataclasses import dataclass
 from typing import Generic
+
+import av
 
 from vnexis.event import (
     Event,
@@ -26,6 +29,12 @@ from vnexis.vo import (
 @dataclass(kw_only=True, frozen=True)
 class DomainEvent(Event):
     session_id: int
+
+
+@dataclass(kw_only=True, frozen=True)
+class EventHandled(DomainEvent):
+    name: str
+    duration: float
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -70,3 +79,4 @@ class FrameBuffered(DomainEvent):
 class FramePendingDone(DomainEvent):
     key_frame_idx: int
     frames: list[Frame]
+    av_input_stream: av.VideoStream | None = None

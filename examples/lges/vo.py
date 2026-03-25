@@ -1,5 +1,4 @@
 __all__ = [
-    "FrameData",
     "LgesMetadata",
     "DetectionResultDto",
     "FaultFrameDetectResult",
@@ -11,15 +10,12 @@ import numpy as np
 
 from vnexis.vo import (
     DetectResult,
-    Frame,
     Metadata,
-    RawData,
 )
 
-
-@dataclass(frozen=True)
-class FrameData(RawData):
-    frame: Frame
+# @dataclass(frozen=True)
+# class FrameData(RawData):
+#     frame: Frame
 
 
 @dataclass(frozen=True)

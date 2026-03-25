@@ -8,7 +8,6 @@ from lges.event import FaultFrameDetected, FaultFrameDetectionDone
 from lges.vo import (
     DetectionResultDto,
     FaultFrameDetectResult,
-    FrameData,
     LgesMetadata,
 )
 from vnexis.event import EventBus, Preprocessed
@@ -17,14 +16,14 @@ from vnexis.utils import resize_image
 from vnexis.vo import Frame
 
 
-class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
+class FaultFrameDetector(PreprocessedHandler[Frame, LgesMetadata]):
     publishes = [FaultFrameDetectionDone, FaultFrameDetected]
 
     def __init__(
         self,
-        session_id: int | None,
         model_path: str,
-        event_bus: EventBus,
+        session_id: int | None = None,
+        event_bus: EventBus | None = None,
         thresholds: list[float] = [],
         default_threshold: float = 0.7,
     ):
@@ -58,10 +57,10 @@ class FaultFrameDetector(PreprocessedHandler[FrameData, LgesMetadata]):
 
         self.img_size = self.session.get_inputs()[0].shape[2:]
 
-    def process(self, event: Preprocessed[FrameData, LgesMetadata]) -> None:
+    def process(self, event: Preprocessed[Frame, LgesMetadata]) -> None:
         try:
             s_time = time.perf_counter()
-            img = self._preprocess(event.raw_data.frame)
+            img = self._preprocess(event.raw_data)
             outputs = self.session.run(self.output_names, {self.input_name: img})
             detection_result = self._postprocess(outputs)
             e_time = time.perf_counter()
