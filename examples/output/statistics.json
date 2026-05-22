@@ -1,54 +1,80 @@
 {
   "FrameBufferManager": {
     "0": {
-      "count": 1120,
-      "total_sec": 0.149485,
-      "avg_sec": 0.000133,
-      "std_sec": 0.000182,
-      "median_sec": 0.00012,
-      "p95_sec": 0.000319,
-      "p99_sec": 0.000725,
+      "count": 447,
+      "total_sec": 0.019573,
+      "avg_sec": 4.4e-05,
+      "std_sec": 7.3e-05,
+      "median_sec": 9e-06,
+      "p95_sec": 0.000137,
+      "p99_sec": 0.00024,
       "min_sec": 4e-06,
-      "max_sec": 0.002545
+      "max_sec": 0.000881
     }
   },
   "TriggerTracker": {
     "0": {
-      "count": 913,
-      "total_sec": 0.119214,
-      "avg_sec": 0.000131,
-      "std_sec": 0.00031,
-      "median_sec": 0.000106,
-      "p95_sec": 0.000187,
-      "p99_sec": 0.000678,
-      "min_sec": 9e-06,
-      "max_sec": 0.009061
+      "count": 447,
+      "total_sec": 0.035197,
+      "avg_sec": 7.9e-05,
+      "std_sec": 5.2e-05,
+      "median_sec": 7e-05,
+      "p95_sec": 9.4e-05,
+      "p99_sec": 0.00023,
+      "min_sec": 1e-05,
+      "max_sec": 0.00086
     }
   },
   "KeyFrameDetector": {
     "0": {
-      "count": 914,
-      "total_sec": 45.213541,
-      "avg_sec": 0.049468,
-      "std_sec": 0.281777,
-      "median_sec": 0.039921,
-      "p95_sec": 0.054095,
-      "p99_sec": 0.068043,
-      "min_sec": 0.022516,
-      "max_sec": 8.554958
+      "count": 447,
+      "total_sec": 9.310328,
+      "avg_sec": 0.020828,
+      "std_sec": 0.035249,
+      "median_sec": 0.019778,
+      "p95_sec": 0.023097,
+      "p99_sec": 0.026584,
+      "min_sec": 0.014297,
+      "max_sec": 0.762079
     }
   },
   "FaultFrameDetector": {
     "0": {
-      "count": 9,
-      "total_sec": 1.799034,
-      "avg_sec": 0.199893,
-      "std_sec": 0.363375,
-      "median_sec": 0.078154,
-      "p95_sec": 0.741165,
-      "p99_sec": 1.082992,
-      "min_sec": 0.062728,
-      "max_sec": 1.168449
+      "count": 4,
+      "total_sec": 0.61577,
+      "avg_sec": 0.153943,
+      "std_sec": 0.234238,
+      "median_sec": 0.039874,
+      "p95_sec": 0.435807,
+      "p99_sec": 0.491342,
+      "min_sec": 0.030796,
+      "max_sec": 0.505226
+    }
+  },
+  "DefectDetectedFrameSaver": {
+    "0": {
+      "count": 4,
+      "total_sec": 0.077309,
+      "avg_sec": 0.019327,
+      "std_sec": 0.001933,
+      "median_sec": 0.019506,
+      "p95_sec": 0.021094,
+      "p99_sec": 0.021146,
+      "min_sec": 0.017138,
+      "max_sec": 0.021158
+    }
+  },
+  "VideoSaver": {
+    "0": {
+      "count": 3,
+      "total_sec": 0.14979,
+      "avg_sec": 0.04993,
+      "std_sec": 0.006961,
+      "median_sec": 0.046647,
+      "p95_sec": 0.056798,
+      "p99_sec": 0.0577,
+      "min_sec": 0.045217,
+      "max_sec": 0.057926
     }
   }
 }

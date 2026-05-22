@@ -6,7 +6,7 @@ from dependency_injector import containers, providers
 
 from vnexis.event import Event, EventBus, save_mermaid_flow
 from vnexis.event.event import (
-    DefectDetected,
+    DetectionDone,
     EventHandled,
     FrameCaptured,
     FramePendingDone,
@@ -70,29 +70,39 @@ class Stream:
         container: StreamContainer | None = None,
         save_defect_frame: bool = False,
         save_video: bool = False,
+        session_ids: list[int] | None = None,
     ):
+        if not session_ids:
+            self._session_ids = list(range(max_sessions))
+        else:
+            self._session_ids = session_ids
+
         self._container = container or StreamContainer()
         self._save_defect_frame = save_defect_frame
         self._save_video = save_video
 
         self._video_readers = [
             self._container.video_reader(session_id=i, path=path)
-            for i, path in enumerate(paths)
+            for i, path in zip(self._session_ids, paths)
         ]
 
         event_bus = self._container.event_bus()
         event_bus.subscribe(EventHandled, self._container.statistics_manager())
         if self._save_defect_frame:
+            # event_bus.subscribe(
+            #     DefectDetected, self._container.defect_detected_frame_saver()
+            # )
             event_bus.subscribe(
-                DefectDetected, self._container.defect_detected_frame_saver()
+                DetectionDone, self._container.defect_detected_frame_saver()
             )
         if self._save_video:
             frame_buffer_manager = self._container.frame_buffer_manager()
-            for i in range(max_sessions):
+            for i in self._session_ids:
                 frame_buffer_manager.add_session(i)
             event_bus.subscribe(FramePendingDone, self._container.video_saver())
             event_bus.subscribe(FrameCaptured, frame_buffer_manager)
-            event_bus.subscribe(DefectDetected, self._container.video_requester())
+            # event_bus.subscribe(DefectDetected, self._container.video_requester())
+            event_bus.subscribe(DetectionDone, self._container.video_requester())
 
     def add_handler(
         self,
@@ -105,7 +115,7 @@ class Stream:
         event_bus.subscribe(event, handler, session_id)
 
     def connect(self):
-        for i, video_reader in enumerate(self._video_readers):
+        for i, video_reader in zip(self._session_ids, self._video_readers):
             video_reader.connect()
             frame_clipper = self._container.frame_buffer_manager().get_frame_clipper(i)
             frame_clipper.av_input_stream = video_reader.stream

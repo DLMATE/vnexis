@@ -64,9 +64,9 @@ class KeyFrameDetector(RawDataCollectedHandler[Frame]):
             outputs = self.session.run(self.output_names, {self.input_name: img})
             detection_result = self._postprocess(outputs)
             e_time = time.perf_counter()
-            self.logger.info(
-                f"client_id: {self._session_id}, frame_idx: {event.raw_data.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {(e_time - s_time) * 1000:.2f} ms"
-            )
+            # self.logger.info(
+            #     f"client_id: {self._session_id}, frame_idx: {event.raw_data.idx} processed. boxes[0]: {detection_result.boxes[0]}. time: {(e_time - s_time) * 1000:.2f} ms"
+            # )
             metadata = LgesMetadata(
                 cell_id=str(uuid4()), key_frame_detect_time=e_time - s_time
             )

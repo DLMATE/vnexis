@@ -141,7 +141,7 @@ class VideoReader(RawDataCollector[Frame]):
             frame = Frame(idx=idx, raw=packet, data=data)
             t2 = time.time()
             logger.info(
-                f"[Collect] decode: {(t1 - t0) * 1000:.4f} ms | numpy: {(t2 - t1) * 1000:.4f} ms"
+                f"[Collect] session_id: {self._session_id}, decode: {(t1 - t0) * 1000:.4f} ms | numpy: {(t2 - t1) * 1000:.4f} ms"
             )
             yield frame
             self._event_bus.publish(

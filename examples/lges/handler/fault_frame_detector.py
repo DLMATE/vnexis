@@ -65,6 +65,9 @@ class FaultFrameDetector(PreprocessedHandler[Frame, LgesMetadata]):
             detection_result = self._postprocess(outputs)
             e_time = time.perf_counter()
             is_defect = len(detection_result.boxes) > 0
+            self.logger.info(
+                f"[FaultFrameDetector] {event.frame.idx} - is_defect: {is_defect}"
+            )
             self._event_bus.publish(
                 FaultFrameDetectionDone(
                     session_id=event.session_id,

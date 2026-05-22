@@ -28,12 +28,13 @@ def run_stream(process_id: int, enable_web: bool = False, web_port: int = 8080):
 
     vnexis = Stream(
         max_sessions=1,
+        session_ids=[process_id],
         paths=[VIDEO_PATH],
         save_defect_frame=True,
         save_video=True,
     )
 
-    session_id = 0
+    session_id = process_id
     fault_frame_detector = FaultFrameDetector(
         FAULT_FRAME_MODEL_PATH, default_threshold=0.2
     )
@@ -77,7 +78,7 @@ def run_stream(process_id: int, enable_web: bool = False, web_port: int = 8080):
 
 
 def main():
-    num_processes = 4
+    num_processes = 1
     processes = []
 
     for i in range(num_processes):
